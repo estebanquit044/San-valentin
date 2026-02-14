@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>San Valentín 💘</title>
+  <style>
+    body{font-family:system-ui,Arial; margin:0; background:#fff5f7; color:#222;}
+    .wrap{max-width:720px; margin:0 auto; padding:20px;}
+    .card{background:white; border-radius:18px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.08); margin:14px 0;}
+    h1{margin:10px 0 0;}
+    .btn{border:0; padding:12px 14px; border-radius:14px; cursor:pointer; font-weight:600;}
+    .btn-primary{background:#ff4d6d; color:white;}
+    .btn-ghost{background:#ffe3ea;}
+    input{padding:12px; border-radius:12px; border:1px solid #ddd; width:100%; font-size:16px; margin-top:8px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap;}
+    .row .btn{flex:1; min-width:160px;}
+    .hidden{display:none;}
+    .heart{
+      width:52px; height:52px; position:relative; transform:rotate(-45deg);
+      background:#ff4d6d; border-radius:10px; cursor:pointer; user-select:none;
+    }
+    .heart:before, .heart:after{
+      content:""; position:absolute; width:52px; height:52px; background:#ff4d6d; border-radius:50%;
+    }
+    .heart:before{top:-26px; left:0;}
+    .heart:after{left:26px; top:0;}
+    .arena{height:220px; position:relative; background:#fff0f3; border-radius:16px; overflow:hidden;}
+    .heartWrap{position:absolute; left:20px; top:90px; transition:all .18s ease;}
+    .small{opacity:.8; font-size:14px;}
+    .ok{color:#0a7; font-weight:700;}
+    .bad{color:#c00; font-weight:700;}
+    .puzzle{
+  margin-top:12px;
+  display:grid;
+  gap:6px;
+  background:#fff0f3;
+  padding:12px;
+  border-radius:16px;
+  user-select:none;
+}
+
+.tile{
+  width:100%;
+  aspect-ratio: 1 / 1;
+  border-radius:12px;
+  background-size:cover;
+  background-repeat:no-repeat;
+  cursor:grab;
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
+}
+
+.tile:active{
+  cursor:grabbing;
+}
+
+.tile.dragging{
+  opacity:0.6;
+}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <p class="small">Para: <b>Mi amochitoo 🥰❤️</b>     De: <b>TU FAN #1</b></p>
+      <h1>Mini Escape Room 💘</h1>
+      <p>3 retitos. Si ganas, sorpresita 😈❤️</p>
+    </div>
+
+    <!-- Nivel 1 -->
+    <div class="card" id="lvl1">
+      <h2>Reto 1: La clave</h2>
+      <p>Escribe la clave (pista: <b>YA CAMBIA DE CONTRASEÑA</b>)</p>
+      <input id="code" placeholder="Ej: 1402" />
+      <button class="btn btn-primary" onclick="checkCode()">Probar</button>
+      <p id="msg1"></p>
+    </div>
+
+    <!-- Nivel 2 -->
+    <div class="card hidden" id="lvl2">
+      <h2>Reto 2: Elige tu puerta</h2>
+      <p>Solo una puerta te lleva al premio… (o tal vez todas, pero una es más tú 😏)</p>
+      <div class="row">
+        <button class="btn btn-ghost" onclick="door('dulce')">🍭 Dulce</button>
+        <button class="btn btn-ghost" onclick="door('drama')">🎭 Drama</button>
+        <button class="btn btn-ghost" onclick="door('tu')">💘 Tú</button>
+      </div>
+      <p id="msg2"></p>
+    </div>
+
+    <!-- Nivel 3 -->
+    <div class="card hidden" id="lvl3">
+  <h2>Reto 3: Arma nuestro rompecabezas 🧩❤️</h2>
+  <p>Si lo armas, desbloqueas el regalito final.</p>
+  <div id="puzzle" class="puzzle"></div>
+  <p id="msg3"></p>
+</div>
+
+    <!-- Final -->
+    <div class="card hidden" id="final">
+      <h2>🎉 Desbloqueado</h2>
+      <p><b>Feliz San Valentín, TU PAREJA ❤️</b></p>
+      <p>
+        MI AMOOOOOOOOOOOOOOOOOOOOOR, primer san valentin juntitos❤️. Estoy seguro que seran infiniiiiiiitos más y cada uno mejor que el anterior.
+        Gracias por toditito el amor que me has brindado y, a pesar de que recién somos novios, gracias por ser la mejooooooooooooooor novia del mundo. Te amo
+        y te amaré toda la vida mi amochito hermosa 🥰🥰❤️❤️❤️.
+      </p>
+
+      <div class="card" style="background:#fff0f3;">
+        <p><b>🎁 Tu premio:</b> UNA CITA VIRTUAL / VIDEOLLAMADA / SALIDA LO MAS PRONTO POSIBLE / CUPÓN DE LO QUE QUIERAS 🥰</p>
+        <p class="small">Y si queri puedes obtener una fotito pidiendola al número de confianza.😉</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // CAMBIA ESTO:
+    const SECRET = "Dan1el1ta_"; // <- tu clave (ej: 14 de febrero = 1402)
+
+    function checkCode(){
+      const v = document.getElementById("code").value.trim();
+      const msg = document.getElementById("msg1");
+      if(v === SECRET){
+        msg.innerHTML = "<span class='ok'>Ti, ya cámbiala porfavor, teaaaaaaamo ❤️.</span>";
+        document.getElementById("lvl2").classList.remove("hidden");
+        document.getElementById("lvl1").scrollIntoView({behavior:"smooth"});
+      } else {
+        msg.innerHTML = "<span class='bad'>Ño, como pista, es parecido a como te decía al principio. 😊</span>";
+      }
+    }
+
+    let chosen = false;
+    function door(type){
+      const msg = document.getElementById("msg2");
+      if(chosen) return;
+      chosen = true;
+
+      if(type === "tu"){
+        msg.innerHTML = "<span class='ok'>Obvio elegiste la correcta 💘. Vamos al reto 3.</span>";
+      } else if(type === "dulce"){
+        msg.innerHTML = "Te fuiste por lo tierno 🍭… igual me gusta. Pero intenta otra vez: la opción correcta siempre serás <b>Tú</b> 😌";
+        chosen = false;
+        return;
+      } else {
+        msg.innerHTML = "Te encanta el drama, pero no. La puerta correcta es <b>Tú</b> 💘";
+        chosen = false;
+        return;
+      }
+      document.getElementById("lvl3").classList.remove("hidden");
+      startPuzzleLevel();
+      document.getElementById("lvl2").scrollIntoView({behavior:"smooth"});
+    }
+
+    // ====== NIVEL 3: ROMPECABEZAS ======
+// ====== NIVEL 3: ROMPECABEZAS (imagen fija) ======
+const FIXED_IMAGE = "img/2026.png"; // <- tu imagen (en tu carpeta del proyecto)
+let puzzleSize = 4; // 3 = 3x3 (fácil). Cambia a 4 para más difícil.
+let correct = [];
+let imgURL = FIXED_IMAGE;
+
+function startPuzzleLevel(){
+  buildPuzzle(FIXED_IMAGE);
+}
+
+function setGrid(n){
+  const puzzleEl = document.getElementById("puzzle");
+  puzzleEl.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+}
+
+function buildPuzzle(imageUrl){
+  imgURL = imageUrl;
+
+  const puzzleEl = document.getElementById("puzzle");
+  const msg3 = document.getElementById("msg3");
+
+  if(!puzzleEl || !msg3){
+    console.error("No encuentro #puzzle o #msg3 en el HTML del nivel 3");
+    return;
+  }
+
+  setGrid(puzzleSize);
+  puzzleEl.innerHTML = "";
+  msg3.innerHTML = "Mezclando piezas...";
+
+  const total = puzzleSize * puzzleSize;
+  const indices = Array.from({length: total}, (_, i) => i);
+  correct = indices.slice();
+
+  let shuffled = shuffle(indices.slice());
+  while (isSolved(shuffled, correct)) shuffled = shuffle(indices.slice());
+
+  shuffled.forEach((idx) => {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.draggable = true;
+    tile.dataset.idx = idx;
+
+    paintTile(tile, idx);
+    addDnD(tile);
+
+    puzzleEl.appendChild(tile);
+  });
+
+  msg3.innerHTML = "Arrastra una pieza encima de otra para intercambiarlas 🧩 (en celular: toca 2 piezas)";
+}
+
+function paintTile(tile, idx){
+  const row = Math.floor(idx / puzzleSize);
+  const col = idx % puzzleSize;
+
+  tile.style.backgroundImage = `url('${imgURL}')`;
+  tile.style.backgroundSize = `${puzzleSize * 100}% ${puzzleSize * 100}%`;
+
+  // posición en % (seguro incluso cuando puzzleSize=3)
+  const x = (col * 100) / (puzzleSize - 1);
+  const y = (row * 100) / (puzzleSize - 1);
+  tile.style.backgroundPosition = `${x}% ${y}%`;
+}
+
+let dragged = null;
+let tapped = null;
+
+function addDnD(tile){
+  // PC: arrastrar
+  tile.addEventListener("dragstart", (e) => {
+    dragged = tile;
+    tile.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+  });
+
+  tile.addEventListener("dragend", () => {
+    tile.classList.remove("dragging");
+    dragged = null;
+  });
+
+  tile.addEventListener("dragover", (e) => e.preventDefault());
+
+  tile.addEventListener("drop", (e) => {
+    e.preventDefault();
+    if(!dragged || dragged === tile) return;
+    swapTiles(dragged, tile);
+    checkPuzzle();
+  });
+
+  // Celular: tocar 2 piezas para intercambiar
+  tile.addEventListener("click", () => {
+    if(!tapped){
+      tapped = tile;
+      tile.style.outline = "3px solid #ff4d6d";
+      return;
+    }
+
+    tapped.style.outline = "none";
+    if(tapped !== tile){
+      swapTiles(tapped, tile);
+      checkPuzzle();
+    }
+    tapped = null;
+  });
+}
+
+function swapTiles(a, b){
+  const aIdx = a.dataset.idx;
+  a.dataset.idx = b.dataset.idx;
+  b.dataset.idx = aIdx;
+
+  paintTile(a, parseInt(a.dataset.idx, 10));
+  paintTile(b, parseInt(b.dataset.idx, 10));
+}
+
+function checkPuzzle(){
+  const puzzleEl = document.getElementById("puzzle");
+  const msg3 = document.getElementById("msg3");
+
+  const current = Array.from(puzzleEl.querySelectorAll(".tile"))
+    .map(t => parseInt(t.dataset.idx, 10));
+
+  if(isSolved(current, correct)){
+    msg3.innerHTML = "<span class='ok'>¡Lo armaste! 🥹❤️ Desbloqueando regalo...</span>";
+    document.getElementById("final").classList.remove("hidden");
+    document.getElementById("final").scrollIntoView({behavior:"smooth"});
+  } else {
+    msg3.innerHTML = "Vas bien… 👀 sigue armando. Como ayudita, las letras grandes van en el centro.";
+  }
+}
+
+function isSolved(a, b){
+  if(a.length !== b.length) return false;
+  for(let i=0; i<a.length; i++){
+    if(a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+  </script>
+</body>
+</html>
